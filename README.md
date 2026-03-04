@@ -28,3 +28,5 @@ cowork clone metadata
 cowork clone preview
 cowork clone contribute
 ```
+
+Cold-start contribution path: use branch + PR, then squash merge.

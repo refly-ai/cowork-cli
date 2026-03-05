@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use cowork::commands::clone::{
-    run_contribute, run_init, run_metadata, run_preview, run_update, run_version,
+    run_contribute, run_init, run_metadata, run_preview, run_resource, run_update, run_version,
 };
 use cowork::commands::self_update::run as run_self_update;
 use tracing_subscriber::{prelude::*, EnvFilter};
@@ -51,6 +51,8 @@ enum CloneCommands {
     Preview,
     /// Print worktree-based contribution flow
     Contribute,
+    /// Print undefined resource convention guide
+    Resource,
 }
 
 fn main() -> Result<()> {
@@ -66,6 +68,7 @@ fn main() -> Result<()> {
             CloneCommands::Metadata => run_metadata(),
             CloneCommands::Preview => run_preview(),
             CloneCommands::Contribute => run_contribute(),
+            CloneCommands::Resource => run_resource(),
         },
     }
 }

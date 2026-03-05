@@ -43,6 +43,7 @@ fn clone_subcommand_help_works() {
     assert!(text.contains("metadata"));
     assert!(text.contains("preview"));
     assert!(text.contains("contribute"));
+    assert!(text.contains("resource"));
 }
 
 #[test]

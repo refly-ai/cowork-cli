@@ -204,6 +204,35 @@ pub fn run_contribute() -> Result<()> {
     Ok(())
 }
 
+pub fn run_resource() -> Result<()> {
+    let path = clone_path()?;
+    let resources_root = path.join("resources");
+
+    println!("Undefined resource guide (print-only)");
+    println!("root: {}", resources_root.display());
+    println!();
+    println!("Convention:");
+    println!("- Store raw materials under clone/resources/<ts>/<contributor>/...");
+    println!("- Keep file type open (for example: .md, .json, .txt, images)");
+    println!("- Use this area for valuable but not yet system-extracted materials");
+    println!();
+    println!("Examples:");
+    println!(
+        "mkdir -p {}/20260304T180000Z/alice",
+        resources_root.display()
+    );
+    println!(
+        "cp ./meeting-notes.md {}/20260304T180000Z/alice/meeting-notes.md",
+        resources_root.display()
+    );
+    println!(
+        "cp ./design-sketch.json {}/20260304T180000Z/alice/design-sketch.json",
+        resources_root.display()
+    );
+
+    Ok(())
+}
+
 pub fn clone_path() -> Result<PathBuf> {
     let repo_root = repo_root_path()?;
     let subdir = config::repo_subdir();

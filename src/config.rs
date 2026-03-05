@@ -6,10 +6,10 @@ use anyhow::{Context, Result};
 pub const COWORK_HOME_ENV: &str = "COWORK_HOME";
 pub const COWORK_CLONE_REPO_URL_ENV: &str = "COWORK_CLONE_REPO_URL";
 pub const COWORK_CLONE_REPO_ALIAS_ENV: &str = "COWORK_CLONE_REPO_ALIAS";
-pub const COWORK_CLONE_REPO_SUBDIR_ENV: &str = "COWORK_CLONE_REPO_SUBDIR";
 pub const COWORK_CLONE_SESSION_ENV: &str = "COWORK_CLONE_SESSION";
 pub const COWORK_CLONE_PREVIEW_CMD_ENV: &str = "COWORK_CLONE_PREVIEW_CMD";
 pub const COWORK_CLONE_METADATA_TREE_DEPTH_ENV: &str = "COWORK_CLONE_METADATA_TREE_DEPTH";
+pub const COWORK_CLONE_PACKAGE_URL_ENV: &str = "COWORK_CLONE_PACKAGE_URL";
 pub const COWORK_SELF_UPDATE_INSTALL_URL_ENV: &str = "COWORK_SELF_UPDATE_INSTALL_URL";
 
 pub const DEFAULT_ALIAS: &str = "default";
@@ -34,10 +34,6 @@ pub fn cowork_home() -> Result<PathBuf> {
 
 pub fn repo_alias() -> String {
     read_env_or_default(COWORK_CLONE_REPO_ALIAS_ENV, DEFAULT_ALIAS)
-}
-
-pub fn repo_subdir() -> String {
-    read_env_or_default(COWORK_CLONE_REPO_SUBDIR_ENV, "")
 }
 
 pub fn clone_session() -> String {

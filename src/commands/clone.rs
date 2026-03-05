@@ -10,7 +10,6 @@ use serde_json::Value;
 
 use crate::config;
 
-const REMOTE_PACKAGE_URL_ENV: &str = "REFLY_CLONE_PACKAGE_URL";
 const DEFAULT_REMOTE_PACKAGE_URL: &str =
     "https://raw.githubusercontent.com/refly-ai/agent-digital-cowork/main/clone/package.json";
 
@@ -28,19 +27,13 @@ pub fn run_version() -> Result<()> {
     let local = read_version_file(&local_package)?;
     println!("local version : {}", local);
 
-    let remote_url = std::env::var(REMOTE_PACKAGE_URL_ENV)
+    let remote_url = std::env::var(config::COWORK_CLONE_PACKAGE_URL_ENV)
         .ok()
         .filter(|value| !value.trim().is_empty())
         .unwrap_or_else(|| DEFAULT_REMOTE_PACKAGE_URL.to_string());
 
-    let remote = match fetch_remote_version(&remote_url) {
-        Ok(value) => value,
-        Err(error) => {
-            println!("remote version: unavailable");
-            println!("note: failed to fetch remote package.json: {error}");
-            return Ok(());
-        }
-    };
+    let remote = fetch_remote_version(&remote_url)
+        .with_context(|| format!("failed to fetch remote package.json from {}", remote_url))?;
 
     println!("remote version: {}", remote);
     match compare_versions(&local, &remote) {
@@ -78,11 +71,7 @@ pub fn run_init() -> Result<()> {
 
     let clone_path = clone_path()?;
     if !clone_path.is_dir() {
-        bail!(
-            "clone path does not exist (check {}): {}",
-            config::COWORK_CLONE_REPO_SUBDIR_ENV,
-            clone_path.display()
-        );
+        bail!("clone path does not exist: {}", clone_path.display());
     }
 
     println!("initialized clone at {}", clone_path.display());
@@ -179,6 +168,14 @@ pub fn run_preview() -> Result<()> {
 
 pub fn run_contribute() -> Result<()> {
     let path = clone_path()?;
+    println!("WARN: guide-only command (print-only), no state changes will be made.");
+    if !path.is_dir() {
+        println!(
+            "WARN: base clone path does not exist yet: {}",
+            path.display()
+        );
+        println!("WARN: run `cowork clone init` first.");
+    }
     println!("Worktree contribution flow (print-only)");
     println!("1) Ensure base clone exists at: {}", path.display());
     println!("2) Create a branch worktree for your task");
@@ -208,6 +205,14 @@ pub fn run_resource() -> Result<()> {
     let path = clone_path()?;
     let resources_root = path.join("resources");
 
+    println!("WARN: guide-only command (print-only), no state changes will be made.");
+    if !path.is_dir() {
+        println!(
+            "WARN: base clone path does not exist yet: {}",
+            path.display()
+        );
+        println!("WARN: run `cowork clone init` first.");
+    }
     println!("Undefined resource guide (print-only)");
     println!("root: {}", resources_root.display());
     println!();
@@ -234,12 +239,7 @@ pub fn run_resource() -> Result<()> {
 }
 
 pub fn clone_path() -> Result<PathBuf> {
-    let repo_root = repo_root_path()?;
-    let subdir = config::repo_subdir();
-    if subdir.trim().is_empty() {
-        return Ok(repo_root);
-    }
-    Ok(repo_root.join(subdir))
+    repo_root_path()
 }
 
 fn repo_root_path() -> Result<PathBuf> {

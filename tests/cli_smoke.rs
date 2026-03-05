@@ -81,3 +81,58 @@ fn clone_init_fails_if_target_exists() {
         .assert()
         .failure();
 }
+
+#[test]
+fn clone_contribute_succeeds_with_warning_when_clone_missing() {
+    let home = temp_home("contribute-missing-path");
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_cowork"));
+    let output = cmd
+        .env("COWORK_HOME", home)
+        .env("COWORK_CLONE_REPO_ALIAS", "missing")
+        .args(["clone", "contribute"])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let text = String::from_utf8_lossy(&output);
+    assert!(text.contains("WARN: guide-only command"));
+    assert!(text.contains("run `cowork clone init` first"));
+}
+
+#[test]
+fn clone_resource_succeeds_with_warning_when_clone_missing() {
+    let home = temp_home("resource-missing-path");
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_cowork"));
+    let output = cmd
+        .env("COWORK_HOME", home)
+        .env("COWORK_CLONE_REPO_ALIAS", "missing")
+        .args(["clone", "resource"])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let text = String::from_utf8_lossy(&output);
+    assert!(text.contains("WARN: guide-only command"));
+    assert!(text.contains("run `cowork clone init` first"));
+}
+
+#[test]
+fn clone_version_fails_when_remote_unavailable() {
+    let home = temp_home("version-remote-unavailable");
+    let clone_root = home.join("clones").join("default");
+    fs::create_dir_all(&clone_root).expect("create clone root");
+    fs::write(clone_root.join("package.json"), r#"{"version":"0.1.0"}"#)
+        .expect("write local package.json");
+
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_cowork"));
+    cmd.env("COWORK_HOME", home)
+        .env(
+            "COWORK_CLONE_PACKAGE_URL",
+            "http://127.0.0.1:1/unreachable.json",
+        )
+        .args(["clone", "version"])
+        .assert()
+        .failure();
+}

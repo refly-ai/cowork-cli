@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO="refly-ai/cowork-cli"
+REPO="powerformer/cowork-cli"
 INSTALL_ROOT="${HOME}/.cowork"
 BIN_DIR="${INSTALL_ROOT}/bin"
 BIN_PATH="${BIN_DIR}/cowork"

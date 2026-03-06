@@ -17,7 +17,7 @@ pub const DEFAULT_SESSION: &str = "cowork-preview";
 pub const DEFAULT_PREVIEW_CMD: &str = "npm run dev";
 pub const DEFAULT_METADATA_TREE_DEPTH: usize = 3;
 pub const DEFAULT_INSTALL_URL: &str =
-    "https://raw.githubusercontent.com/refly-ai/cowork-cli/main/install.sh";
+    "https://raw.githubusercontent.com/powerformer/cowork-cli/main/install.sh";
 
 pub fn cowork_home() -> Result<PathBuf> {
     match env::var(COWORK_HOME_ENV) {

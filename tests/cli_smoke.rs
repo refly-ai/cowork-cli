@@ -119,6 +119,25 @@ fn clone_resource_succeeds_with_warning_when_clone_missing() {
 }
 
 #[test]
+fn clone_preview_succeeds_with_warning_when_clone_missing() {
+    let home = temp_home("preview-missing-path");
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_cowork"));
+    let output = cmd
+        .env("COWORK_HOME", home)
+        .env("COWORK_CLONE_REPO_ALIAS", "missing")
+        .args(["clone", "preview"])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let text = String::from_utf8_lossy(&output);
+    assert!(text.contains("WARN: guide-only command"));
+    assert!(text.contains("run `cowork clone init` first"));
+    assert!(text.contains("Preview guidance (print-only)"));
+}
+
+#[test]
 fn clone_version_fails_when_remote_unavailable() {
     let home = temp_home("version-remote-unavailable");
     let clone_root = home.join("clones").join("default");

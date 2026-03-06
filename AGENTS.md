@@ -40,7 +40,7 @@
 ## 常见问题
 
 - **`clone init` 失败**：检查 `COWORK_CLONE_REPO_URL` 是否已设置。
-- **`clone update/metadata/preview` 失败**：检查目标路径 `COWORK_HOME/clones/COWORK_CLONE_REPO_ALIAS` 是否存在。
+- **`clone update/metadata` 失败**：检查目标路径 `COWORK_HOME/clones/COWORK_CLONE_REPO_ALIAS` 是否存在。
 - **`clone version` 远端获取失败**：检查 `COWORK_CLONE_PACKAGE_URL` 是否可访问；该命令在远端不可达时会失败退出。
-- **`clone preview` 提示 session 已存在**：执行 `tmux attach -t <session>` 或手动清理旧 session。
+- **`clone preview` 只有文本建议**：该命令是 guide-only，不会自动启动 tmux 或预览进程。
 - **`self-update` 失败**：检查 `install.sh` 地址可访问，以及当前平台是否有对应 release 资产。

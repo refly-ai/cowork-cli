@@ -1,7 +1,7 @@
 use std::ffi::OsString;
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::process::{Command, Stdio};
+use std::process::Command;
 
 use anyhow::{bail, Context, Result};
 use semver::Version;
@@ -126,43 +126,33 @@ pub fn run_metadata() -> Result<()> {
 
 pub fn run_preview() -> Result<()> {
     let path = clone_path()?;
-    ensure_dir_exists(&path)?;
-
     let session = config::clone_session();
     let preview_cmd = config::preview_cmd();
 
-    let has_session = Command::new("tmux")
-        .arg("has-session")
-        .arg("-t")
-        .arg(&session)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .context("failed to check tmux session")?
-        .success();
-
-    if has_session {
-        bail!(
-            "tmux session '{}' already exists; attach with: tmux attach -t {}",
-            session,
-            session
+    println!("WARN: guide-only command (print-only), no state changes will be made.");
+    if !path.is_dir() {
+        println!(
+            "WARN: base clone path does not exist yet: {}",
+            path.display()
         );
+        println!("WARN: run `cowork clone init` first.");
     }
-
-    run_command(
-        Command::new("tmux")
-            .arg("new-session")
-            .arg("-d")
-            .arg("-s")
-            .arg(&session)
-            .arg("-c")
-            .arg(&path)
-            .arg(&preview_cmd),
-        "failed to start tmux preview session",
-    )?;
-
-    println!("started tmux session '{}' in {}", session, path.display());
-    println!("attach with: tmux attach -t {}", session);
+    println!("Preview guidance (print-only)");
+    println!("clone path: {}", path.display());
+    println!("preview command: {}", preview_cmd);
+    println!("tmux session: {}", session);
+    println!();
+    println!("Suggested manual flow:");
+    println!("1) cd {}", path.display());
+    println!("2) {}", preview_cmd);
+    println!("3) Or run in tmux:");
+    println!(
+        "   tmux new-session -d -s {} -c {} \"{}\"",
+        session,
+        path.display(),
+        preview_cmd
+    );
+    println!("   tmux attach -t {}", session);
     Ok(())
 }
 

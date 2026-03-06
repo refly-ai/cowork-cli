@@ -56,7 +56,7 @@
 - `cowork clone init`：让 agent 在标准路径创建可复现工作副本，降低环境歧义。
 - `cowork clone update`：让 agent 用 `--ff-only` 保持历史线性，减少自动化冲突与回滚复杂度。
 - `cowork clone metadata`：让 agent 快速读取仓库结构与元信息，先理解上下文再行动。
-- `cowork clone preview`：让 agent 启动可附着会话，支持人机共享观察窗口与问题复现。
+- `cowork clone preview`：让 agent 获取预览执行建议与关键元信息（路径/命令/session）。
 - `cowork clone contribute`：让 agent 输出统一贡献流程，减少临场发明流程导致的偏差。
 - `cowork clone resource`：让 agent 把未结构化高价值材料先落盘，避免上下文信息丢失。
 
@@ -80,5 +80,5 @@ cowork clone metadata
 
 补充：
 
-- `cowork clone contribute` / `cowork clone resource` 是 guide-only 命令：只打印建议，不做状态变更。
+- `cowork clone preview` / `cowork clone contribute` / `cowork clone resource` 是 guide-only 命令：只打印建议与关键元信息，不做状态变更。
 - `cowork clone version` 的远端 `package.json` 地址可通过 `COWORK_CLONE_PACKAGE_URL` 覆盖；远端不可达时命令会失败退出。

@@ -19,6 +19,7 @@
 - `meta/docker/run-coldstart-hello.sh`: 最小 cold-start hello 验证脚本。
 - `meta/docker/run-coldstart-local.sh`: 本地私有 auth 注入验证脚本。
 - `meta/subagent/questions.md`: 问题库索引与新增模板。
+- `meta/subagent/validation.md`: 产品视角冷启动验证流程与记录模板。
 - `meta/subagent/acceptance.md`: 验收标准与通过判定模板。
 - `meta/subagent/evaluation.md`: 评估指标与自检闭环。
 

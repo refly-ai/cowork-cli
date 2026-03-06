@@ -14,8 +14,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             target: x86_64-unknown-linux-gnu
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-musl
           - os: macos-14
             target: x86_64-apple-darwin
           - os: macos-14
@@ -110,6 +112,29 @@ jobs:
           tmp_checksums="$(mktemp)"
           find dist -name '*.txt' -type f ! -path 'dist/checksums.txt' -exec cat {} + > "${tmp_checksums}"
           sort -k2 "${tmp_checksums}" | uniq > dist/checksums.txt
+
+      - name: Verify Linux runtime compatibility (Debian bookworm)
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          verify_asset() {
+            asset="$1"
+            path="$(find dist -name "${asset}" -type f | head -n1)"
+            if [[ -z "${path}" ]]; then
+              echo "asset not found: ${asset}" >&2
+              exit 1
+            fi
+
+            cid="$(docker create debian:bookworm-slim sh -lc 'tar -xzf /tmp/cowork.tar.gz -C /tmp && /tmp/cowork --version && /tmp/cowork clone --help >/dev/null')"
+            docker cp "${path}" "${cid}:/tmp/cowork.tar.gz"
+            docker start -a "${cid}"
+            docker rm "${cid}" >/dev/null
+          }
+
+          verify_asset "cowork-${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+          verify_asset "cowork-${VERSION}-x86_64-unknown-linux-musl.tar.gz"
 
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2

@@ -63,6 +63,47 @@ read_checksum() {
   awk -v f="${asset_name}" '$2==f || $2=="*"f {print $1; exit}' "${checksums_file}"
 }
 
+download_and_verify_asset() {
+  local asset_name="$1"
+  local dest_dir="$2"
+  local base_url="$3"
+  local checksums_file="$4"
+
+  local expected
+  expected="$(read_checksum "${checksums_file}" "${asset_name}")"
+  if [[ -z "${expected}" ]]; then
+    echo "checksum not found for ${asset_name}" >&2
+    exit 1
+  fi
+
+  curl -fsSL -o "${dest_dir}/${asset_name}" "${base_url}/${asset_name}"
+  verify_checksum "${dest_dir}/${asset_name}" "${expected}"
+}
+
+install_from_asset() {
+  local asset_name="$1"
+  local src_dir="$2"
+
+  tar -xzf "${src_dir}/${asset_name}" -C "${src_dir}"
+  if [[ ! -f "${src_dir}/cowork" ]]; then
+    echo "release archive missing cowork binary" >&2
+    exit 1
+  fi
+
+  install -m 0755 "${src_dir}/cowork" "${BIN_PATH}"
+  ln -snf "${BIN_PATH}" "${LINK_PATH}"
+  rm -f "${src_dir}/cowork"
+}
+
+run_post_install_check() {
+  local output
+  if ! output="$(${BIN_PATH} --version 2>&1)"; then
+    echo "post-install check failed: ${output}" >&2
+    return 1
+  fi
+  return 0
+}
+
 verify_checksum() {
   local file="$1"
   local expected="$2"
@@ -121,25 +162,28 @@ tmp_dir="$(mktemp -d)"
 trap 'rm -rf "${tmp_dir}"' EXIT
 
 echo "Downloading ${ASSET_URL}"
-curl -fsSL -o "${tmp_dir}/${ASSET}" "${ASSET_URL}"
 curl -fsSL -o "${tmp_dir}/checksums.txt" "${CHECKSUMS_URL}"
-
-expected="$(read_checksum "${tmp_dir}/checksums.txt" "${ASSET}")"
-if [[ -z "${expected}" ]]; then
-  echo "checksum not found for ${ASSET}" >&2
-  exit 1
-fi
-verify_checksum "${tmp_dir}/${ASSET}" "${expected}"
+download_and_verify_asset "${ASSET}" "${tmp_dir}" "${BASE_URL}" "${tmp_dir}/checksums.txt"
 
 mkdir -p "${BIN_DIR}" "${LOCAL_BIN_DIR}"
-tar -xzf "${tmp_dir}/${ASSET}" -C "${tmp_dir}"
-if [[ ! -f "${tmp_dir}/cowork" ]]; then
-  echo "release archive missing cowork binary" >&2
-  exit 1
-fi
+install_from_asset "${ASSET}" "${tmp_dir}"
 
-install -m 0755 "${tmp_dir}/cowork" "${BIN_PATH}"
-ln -snf "${BIN_PATH}" "${LINK_PATH}"
+if ! run_post_install_check; then
+  if [[ "$(uname -s):$(uname -m)" == "Linux:x86_64" ]]; then
+    fallback_target="x86_64-unknown-linux-musl"
+    fallback_asset="cowork-${VERSION}-${fallback_target}.tar.gz"
+    echo "Trying fallback asset: ${fallback_asset}"
+    download_and_verify_asset "${fallback_asset}" "${tmp_dir}" "${BASE_URL}" "${tmp_dir}/checksums.txt"
+    install_from_asset "${fallback_asset}" "${tmp_dir}"
+    run_post_install_check || {
+      echo "fallback asset failed to run; check runtime compatibility" >&2
+      exit 1
+    }
+  else
+    echo "installed binary failed runtime check" >&2
+    exit 1
+  fi
+fi
 
 echo "Installed cowork ${VERSION} to ${BIN_PATH}"
 echo "Linked ${LINK_PATH} -> ${BIN_PATH}"

@@ -6,6 +6,7 @@
 
 - `meta/subagent/questions/q001-resource-boundary.md`
 - `meta/subagent/questions/q002-auth-copy-path.md`
+- `meta/subagent/questions/q003-coldstart-feedback.md`
 
 ## 新增问题模板
 

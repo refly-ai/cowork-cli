@@ -6,6 +6,7 @@ You are dropped into a cold-start environment.
 
 - Knowledge repository URL
 - cowork install script URL
+- cowork beta version: `0.1.4-beta`
 
 ## Goal
 
@@ -20,6 +21,8 @@ You are dropped into a cold-start environment.
 - Do not delete content.
 - Keep the change reversible and low risk.
 - Treat `preview`, `contribute`, and `resources` as guide-only commands.
+- Use `COWORK_HOME=/workspace/.cowork` for this task.
+- Install the beta explicitly with `--version 0.1.4-beta`.
 
 ## Success Signals
 

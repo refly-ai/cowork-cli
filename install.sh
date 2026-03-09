@@ -2,7 +2,7 @@
 set -euo pipefail
 
 REPO="powerformer/cowork-cli"
-INSTALL_ROOT="${HOME}/.cowork"
+INSTALL_ROOT="${COWORK_HOME:-${HOME}/.cowork}"
 BIN_DIR="${INSTALL_ROOT}/bin"
 BIN_PATH="${BIN_DIR}/cowork"
 LOCAL_BIN_DIR="${HOME}/.local/bin"
@@ -13,8 +13,8 @@ usage() {
 Usage: install.sh [--version cowork-vX.Y.Z|vX.Y.Z|X.Y.Z]
 
 Install strategy:
-  - binary: ~/.cowork/bin/cowork
-  - symlink: ~/.local/bin/cowork -> ~/.cowork/bin/cowork
+  - binary: ${COWORK_HOME:-~/.cowork}/bin/cowork
+  - symlink: ~/.local/bin/cowork -> ${COWORK_HOME:-~/.cowork}/bin/cowork
 EOF
 }
 

@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+
+if ! (set -o pipefail) 2>/dev/null; then
+  echo "install.sh requires bash. Please run: curl -fsSL https://raw.githubusercontent.com/powerformer/cowork-cli/main/install.sh | bash" >&2
+  exit 1
+fi
+
 set -euo pipefail
 
 REPO="powerformer/cowork-cli"

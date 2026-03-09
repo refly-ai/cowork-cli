@@ -5,6 +5,8 @@ set -u
 REPO_URL_DEFAULT="git@github.com:powerformer/consensus.git"
 REPO_URL="${COWORK_CLONE_REPO_URL:-$REPO_URL_DEFAULT}"
 INSTALL_URL="https://raw.githubusercontent.com/powerformer/cowork-cli/main/install.sh"
+COWORK_HOME_DEFAULT="${COWORK_HOME:-${HOME}/.cowork}"
+COWORK_BIN_DEFAULT="${COWORK_HOME_DEFAULT}/bin/cowork"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -81,9 +83,19 @@ run_capture() {
   return "$rc"
 }
 
+first_line() {
+  printf '%s' "$1" | python3 - <<'PY'
+import sys
+text = sys.stdin.read().strip().splitlines()
+print(text[0] if text else "")
+PY
+}
+
 section "Bootstrap Check"
 line "repo_url: ${REPO_URL}"
 line "install_url: ${INSTALL_URL}"
+line "cowork_home: ${COWORK_HOME_DEFAULT}"
+line "cowork_bin: ${COWORK_BIN_DEFAULT}"
 
 section "Commands"
 check_cmd bash
@@ -106,6 +118,7 @@ if [[ "$HAS_COWORK" -eq 1 ]]; then
   info "cowork_version=$(cowork --version 2>/dev/null || true)"
 else
   info "cowork_install_hint=curl -fsSL ${INSTALL_URL} | bash"
+  info "cowork_expected_bin=${COWORK_BIN_DEFAULT}"
 fi
 
 section "GitHub CLI"
@@ -119,9 +132,7 @@ if [[ "$HAS_GH" -eq 1 ]]; then
     NEED_GH=1
   fi
   info "exit=${GH_RC}"
-  while IFS= read -r line; do
-    info "$line"
-  done <<< "$GH_OUTPUT"
+  [[ "$GH_RC" -ne 0 ]] && info "detail=$(first_line "$GH_OUTPUT")"
 fi
 
 section "SSH"
@@ -134,9 +145,9 @@ else
   NEED_SSH=1
 fi
 info "exit=${SSH_RC}"
-while IFS= read -r line; do
-  [[ -n "$line" ]] && info "$line"
-done <<< "$SSH_OUTPUT"
+if [[ "$SSH_RC" -ne 0 && "$SSH_RC" -ne 1 ]]; then
+  info "detail=$(first_line "$SSH_OUTPUT")"
+fi
 
 section "Repository Access"
 GIT_SSH_COMMAND='ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new'
@@ -151,9 +162,9 @@ else
   NEED_REPO=1
 fi
 info "exit=${REPO_RC}"
-while IFS= read -r line; do
-  [[ -n "$line" ]] && info "$line"
-done <<< "$REPO_OUTPUT"
+if [[ "$REPO_RC" -ne 0 ]]; then
+  info "detail=$(first_line "$REPO_OUTPUT")"
+fi
 
 section "Summary"
 line "pass_count=${PASS_COUNT}"
@@ -167,6 +178,7 @@ fi
 section "Next Actions"
 if [[ "$NEED_COWORK" -eq 1 ]]; then
   line "[action] Install cowork: curl -fsSL ${INSTALL_URL} | bash"
+  line "[action] Expected cowork binary path after install: ${COWORK_BIN_DEFAULT}"
 fi
 if [[ "$NEED_GH" -eq 1 ]]; then
   line "[action] Authenticate GitHub CLI: gh auth login"

@@ -9,7 +9,8 @@
 - `src/bin/`: CLI 入口（参数与子命令分发）。
 - `src/commands/`: 命令实现。
 - `src/config.rs`: `COWORK_*` 环境变量与默认值。
-- `scripts/`: 辅助脚本（如团队冷启动 bootstrap 检查）。
+- `bootstrap.sh`: 团队冷启动入口检查脚本。
+- `scripts/`: 辅助脚本实现。
 - `tests/`: 命令级 smoke tests。
 - `.github/workflows/`: CI 与 release 工作流。
 - `install.sh`: 发布资产安装脚本。
@@ -50,7 +51,7 @@
 - `cargo run -- clone --help`
 - `cargo run -- clone metadata`
 - `cargo run -- clone preview`
-- `bash scripts/bootstrap.sh`
+- `bash bootstrap.sh`
 
 ## 发布约定
 

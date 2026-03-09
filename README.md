@@ -88,7 +88,7 @@ cowork clone metadata
 ## Team Bootstrap Check
 
 ```bash
-bash scripts/bootstrap.sh
+bash bootstrap.sh
 ```
 
 This check reports only verifiable local facts (tool availability, auth status, SSH handshake, and repo reachability) and exits non-zero when action is still needed.

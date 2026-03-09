@@ -33,6 +33,7 @@ done
 PASS_COUNT=0
 FAIL_COUNT=0
 NEED_COWORK=0
+NEED_NODE=0
 NEED_GH=0
 NEED_SSH=0
 NEED_REPO=0
@@ -104,13 +105,37 @@ check_cmd git
 HAS_GH=0
 if check_cmd gh; then HAS_GH=1; fi
 check_cmd ssh
+HAS_NODE=0
+if check_cmd node; then HAS_NODE=1; fi
+HAS_NPM=0
+if check_cmd npm; then HAS_NPM=1; fi
 HAS_OPENCODE=0
 if check_cmd opencode; then HAS_OPENCODE=1; fi
 HAS_COWORK=0
 if check_cmd cowork; then HAS_COWORK=1; fi
 if [[ "$HAS_COWORK" -eq 0 ]]; then NEED_COWORK=1; fi
 
+if [[ "$HAS_NODE" -eq 1 ]]; then
+  NODE_VERSION_RAW="$(node --version 2>/dev/null || true)"
+  NODE_MAJOR="$(printf '%s' "$NODE_VERSION_RAW" | sed -E 's/^v([0-9]+).*/\1/')"
+  if [[ "$NODE_MAJOR" == "24" ]]; then
+    pass "node major version is 24"
+  else
+    fail "node major version is not 24"
+    NEED_NODE=1
+  fi
+fi
+if [[ "$HAS_NODE" -eq 0 || "$HAS_NPM" -eq 0 ]]; then
+  NEED_NODE=1
+fi
+
 section "Versions"
+if [[ "$HAS_NODE" -eq 1 ]]; then
+  info "node_version=${NODE_VERSION_RAW:-$(node --version 2>/dev/null || true)}"
+fi
+if [[ "$HAS_NPM" -eq 1 ]]; then
+  info "npm_version=$(npm --version 2>/dev/null || true)"
+fi
 if [[ "$HAS_OPENCODE" -eq 1 ]]; then
   info "opencode_version=$(opencode --version 2>/dev/null || true)"
 fi
@@ -180,6 +205,9 @@ line "[For Agent] If result is action-needed, do not continue repository initial
 if [[ "$NEED_COWORK" -eq 1 ]]; then
   line "[For User] Install cowork: curl -fsSL ${INSTALL_URL} | bash"
   line "[For Agent] Expected cowork binary path after install: ${COWORK_BIN_DEFAULT}"
+fi
+if [[ "$NEED_NODE" -eq 1 ]]; then
+  line "[For User] Install Node.js 24 and ensure both node and npm are available in PATH."
 fi
 if [[ "$NEED_GH" -eq 1 ]]; then
   line "[For User] Authenticate GitHub CLI: gh auth login"

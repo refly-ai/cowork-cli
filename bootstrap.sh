@@ -176,18 +176,19 @@ if [[ "$FAIL_COUNT" -eq 0 ]]; then
 fi
 
 section "Next Actions"
+line "[For Agent] If result is action-needed, do not continue repository initialization. Only restate the actions below or ask for teammate help."
 if [[ "$NEED_COWORK" -eq 1 ]]; then
-  line "[action] Install cowork: curl -fsSL ${INSTALL_URL} | bash"
-  line "[action] Expected cowork binary path after install: ${COWORK_BIN_DEFAULT}"
+  line "[For User] Install cowork: curl -fsSL ${INSTALL_URL} | bash"
+  line "[For Agent] Expected cowork binary path after install: ${COWORK_BIN_DEFAULT}"
 fi
 if [[ "$NEED_GH" -eq 1 ]]; then
-  line "[action] Authenticate GitHub CLI: gh auth login"
+  line "[For User] Authenticate GitHub CLI: gh auth login"
 fi
 if [[ "$NEED_SSH" -eq 1 ]]; then
-  line "[action] Configure GitHub SSH access for this machine; if you do not know how, ask a teammate for help."
+  line "[For User] Configure GitHub SSH access for this machine; if you do not know how, ask a teammate for help."
 fi
 if [[ "$NEED_REPO" -eq 1 ]]; then
-  line "[action] Confirm repository access to ${REPO_URL}; if gh/ssh are already configured but access still fails, ask a teammate for help."
+  line "[For User] Confirm repository access to ${REPO_URL}; if gh/ssh are already configured but access still fails, ask a teammate for help."
 fi
 
 line "result=action-needed"

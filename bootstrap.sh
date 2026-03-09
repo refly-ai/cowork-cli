@@ -30,6 +30,10 @@ done
 
 PASS_COUNT=0
 FAIL_COUNT=0
+NEED_COWORK=0
+NEED_GH=0
+NEED_SSH=0
+NEED_REPO=0
 
 line() {
   printf '%s\n' "$1"
@@ -92,6 +96,7 @@ HAS_OPENCODE=0
 if check_cmd opencode; then HAS_OPENCODE=1; fi
 HAS_COWORK=0
 if check_cmd cowork; then HAS_COWORK=1; fi
+if [[ "$HAS_COWORK" -eq 0 ]]; then NEED_COWORK=1; fi
 
 section "Versions"
 if [[ "$HAS_OPENCODE" -eq 1 ]]; then
@@ -111,6 +116,7 @@ if [[ "$HAS_GH" -eq 1 ]]; then
     pass "gh auth status"
   else
     fail "gh auth status"
+    NEED_GH=1
   fi
   info "exit=${GH_RC}"
   while IFS= read -r line; do
@@ -125,6 +131,7 @@ if [[ "$SSH_RC" -eq 1 || "$SSH_RC" -eq 0 ]]; then
   pass "ssh handshake to github.com"
 else
   fail "ssh handshake to github.com"
+  NEED_SSH=1
 fi
 info "exit=${SSH_RC}"
 while IFS= read -r line; do
@@ -141,6 +148,7 @@ if [[ "$REPO_RC" -eq 0 ]]; then
   pass "git ls-remote ${REPO_URL}"
 else
   fail "git ls-remote ${REPO_URL}"
+  NEED_REPO=1
 fi
 info "exit=${REPO_RC}"
 while IFS= read -r line; do
@@ -154,6 +162,20 @@ line "fail_count=${FAIL_COUNT}"
 if [[ "$FAIL_COUNT" -eq 0 ]]; then
   line "result=ready"
   exit 0
+fi
+
+section "Next Actions"
+if [[ "$NEED_COWORK" -eq 1 ]]; then
+  line "[action] Install cowork: curl -fsSL ${INSTALL_URL} | bash"
+fi
+if [[ "$NEED_GH" -eq 1 ]]; then
+  line "[action] Authenticate GitHub CLI: gh auth login"
+fi
+if [[ "$NEED_SSH" -eq 1 ]]; then
+  line "[action] Configure GitHub SSH access for this machine; if you do not know how, ask a teammate for help."
+fi
+if [[ "$NEED_REPO" -eq 1 ]]; then
+  line "[action] Confirm repository access to ${REPO_URL}; if gh/ssh are already configured but access still fails, ask a teammate for help."
 fi
 
 line "result=action-needed"
